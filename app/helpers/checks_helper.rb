@@ -20,6 +20,17 @@ module ChecksHelper
     end
   end
 
+  def class_for_ssl_expiration(ssl_expires_in)
+    case ssl_expires_in.to_i
+    when 0..7
+      'danger'
+    when 8..30
+      'warning'
+    when 31..9999
+      'success'
+    end
+  end
+
   # Converts the healthcheck's active flag to CSS class
   # to control HTML element color
   # @param active [Boolean] the healthcheck's active flag, `true` or `false`

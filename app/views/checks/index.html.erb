@@ -15,6 +15,7 @@
       <th>Name</th>
       <th>Cron</th>
       <th>Url</th>
+      <th>SSL Expiration</th>
       <th>Status</th>
       <th></th>
     </tr>
@@ -46,6 +47,11 @@
         <td>
           <div class="<%= class_for_status(check.status) %>"><%= link_to check.url, check.url %></div>
           <div class="small text-muted"><%= "Last: " + check.last_contact_at.to_s if check.last_contact_at %></div>
+        </td>
+        <td class="text-nowrap">
+          <div class="text-<%= class_for_ssl_expiration(check.ssl_expires_in) %>">
+            <strong><%= check.ssl_expiration %></strong>
+          </div>
         </td>
         <td>
           <% if check.status.to_i.between?(100, 599) %>

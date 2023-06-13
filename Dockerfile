@@ -4,7 +4,8 @@ FROM ruby:3.1.3-alpine
 RUN apk add --no-cache \
         sqlite-dev \
         tzdata \
-        yarn
+        yarn \
+        openssl
 
 WORKDIR /app
 

@@ -60,13 +60,29 @@ class Check < ApplicationRecord
         rescue *NET_HTTP_ERRORS => e
           status = e.to_s.tr('"', "'")
         end
+        # Check SSL
+        begin
+          @soc = TCPSocket.new(url.to_s.delete_prefix("https://"), 443)
+          @ssl = OpenSSL::SSL::SSLSocket.new(@soc, OpenSSL::SSL::SSLContext.new())
+          @ssl.connect
+          rescue => e
+            puts "CRITICAL - #{e.class} #{e.message}"
+            ssl_expiration = e.to_s.tr('"', "'")
+        end
+        ssl_expiration = @ssl.peer_cert.not_after unless e
+        @current_day = Time.now
+        ssl_expires_in = (@ssl.peer_cert.not_after - @current_day).to_i / (24 * 60 * 60)
+        Rails.logger.info "SSl Certificate for '#{url.to_s.delete_prefix("https://")}' expires in '#{ssl_expires_in}' days"
+        @ssl.close
+        @soc.close
+        # End SSL Check
         status = http_code unless e
         last_contact_at = Time.current
         Rails.logger.info "ciao-scheduler Checked '#{url}' at '#{last_contact_at}' and got '#{status}'"
         status_before = status_after = ''
         ActiveRecord::Base.connection_pool.with_connection do
           status_before = self.status
-          update_columns(status: status, last_contact_at: last_contact_at, next_contact_at: job.next_times(1).first.to_local_time)
+          update_columns(status: status, last_contact_at: last_contact_at, next_contact_at: job.next_times(1).first.to_local_time, ssl_expiration: ssl_expiration, ssl_expires_in: ssl_expires_in)
           status_after = self.status
         end
         if status_before != status_after
@@ -84,6 +100,18 @@ class Check < ApplicationRecord
             )
           end
         end
+        #if ssl_expires_in.to_i < 30
+        #  Rails.logger.info "ciao-scheduler Check '#{name}': SSL Certificate expires in '#{ssl_expires_in}'"
+        #  NOTIFICATIONS.each do |notification|
+        #    notification.notify(
+        #      name: name,
+        #      ssl_expiration: ssl_expiration,
+        #      ssl_expires_in: ssl_expires_in,
+        #      url: url,
+        #      check_url: Rails.application.routes.url_helpers.check_path(self)
+        #    )
+        #  end
+        #end
       end
     if job
       Rails.logger.info "ciao-scheduler Created job '#{job.id}'"

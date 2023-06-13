@@ -38,6 +38,13 @@
         </p>
 
         <p>
+          <strong>SSL Expiration Date:</strong>
+          <span class="text-<%= class_for_ssl_expiration(@check.ssl_expires_in) %>">
+            <strong><%= @check.ssl_expiration %></strong>
+          </span>
+        </p>
+
+        <p>
           <strong>Next contact:</strong>
           <span><%= @check.next_contact_at %></span>
         </p>

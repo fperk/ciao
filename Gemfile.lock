@@ -151,6 +151,7 @@ GEM
       racc (~> 1.4)
     nokogiri (1.14.3-x86_64-linux)
       racc (~> 1.4)
+    openssl (3.0.1)
     parallel (1.22.1)
     parser (3.2.0.0)
       ast (~> 2.4.1)
@@ -318,6 +319,7 @@ DEPENDENCIES
   letter_opener
   listen (~> 3.3)
   mocha
+  openssl (~> 3.0.1)
   prometheus-client
   puma (~> 5.0)
   rack-mini-profiler (~> 2.0)
